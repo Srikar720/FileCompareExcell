@@ -3,7 +3,7 @@ name: Run Excel Compare
 on:
   push:
     branches:
-      - main
+      - development
   workflow_dispatch:
 
 jobs:
