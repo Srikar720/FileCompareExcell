@@ -20,7 +20,7 @@ jobs:
       - name: Get latest and second latest versions
         run: |
           git fetch --unshallow
-          FILE_PATH=".github/excel_files/*.xlsx"
+          FILE_PATH="excel_files/*.xlsx"
           # Get the two latest commits that modified the file
           COMMITS=($(git log -n 2 --pretty=format:"%H" -- $FILE_PATH))
 
@@ -46,7 +46,7 @@ jobs:
         run: ls -lrt temp_files/
 
       - name: Run Python script
-        run: python .github/excel_compare.py temp_files/latest.xlsx temp_files/second_latest.xlsx
+        run: python excel_compare.py temp_files/latest.xlsx temp_files/second_latest.xlsx
 
       - name: Upload output file to artifacts
         uses: actions/upload-artifact@v4
