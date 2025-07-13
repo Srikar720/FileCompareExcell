@@ -1,0 +1,55 @@
+name: Run Excel Compare
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create temp folder
+        run: mkdir temp_files
+
+      - name: Get latest and second latest versions
+        run: |
+          git fetch --unshallow
+          FILE_PATH="excel_files/*.xlsx"
+          # Get the two latest commits that modified the file
+          COMMITS=($(git log -n 2 --pretty=format:"%H" -- $FILE_PATH))
+
+          # Checkout latest version
+          git checkout "${COMMITS[0]}" -- "$FILE_PATH"
+          cp "$FILE_PATH" temp_files/latest.xlsx
+
+          # Checkout second latest version
+          git checkout "${COMMITS[1]}" -- "$FILE_PATH"
+          cp "$FILE_PATH" temp_files/second_latest.xlsx
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r src/main/requirements.txt
+
+      - name: CHeck files
+        run: ls -lrt temp_files/
+
+      - name: Run Python script
+        run: python src/main/excel_compare.py temp_files/latest.xlsx temp_files/second_latest.xlsx
+
+      - name: Upload output file to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: highlighted_all_sheets.xlsx
+          path: highlighted_all_sheets.xlsx
